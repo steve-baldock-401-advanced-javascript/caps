@@ -4,7 +4,7 @@ const events = require('./lib/events.js');
 require('./apps/driver.js');
 require('./apps/vendor.js');
 
-events.on('onPickup', payload => log('onPickup', payload));
+events.on('pickup', payload => log('pickup', payload));
 events.on('in-transit', payload => log('in-transit', payload));
 events.on('delivered', payload => log('delivered', payload));
 
