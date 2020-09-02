@@ -1,6 +1,6 @@
 'use strict';
 
-const inquirer = require('inquirer');
+// const inquirer = require('inquirer');
 const net = require('net');
 
 const client = new net.Socket();
@@ -12,57 +12,47 @@ client.connect(port, host, () => {
 });
 
 require('dotenv').config();
-// const emitter = require('../lib/events.js');
-// require('../caps.js');
-
-// emitter.on('pickup', inTransitHandler);
-// emitter.on('in-transit', deliveredHandler);
-
-// client.on('data', inTransitHandler(order) {
-//     let event = JSON.parse(order);
-
-//     if(event.event === '') {
-
-//     }
-// })
 
 client.on('data', buffer => {
-  let raw = buffer.toString();
-  let object = JSON.parse(raw);
-  checkForPickup(object);
-  simulateDelivery(object);
+  let object = JSON.parse(buffer);
+
+  if(object.event === 'pickup') {
+    checkForPickup(object);
+  } else if (object.event === 'in-transit'){
+    console.log('in-transit');
+    simulateDelivery(object);
+  } 
+
 });
 
 function checkForPickup(object){
-  if(object.event === 'pickup'){
-    setTimeout(() => {
-      console.log('picking up', object.payload.orderID);
-    }, 1000);
-    let newOrder = JSON.stringify(orderInTransit());
+  setTimeout(() => {
+    console.log('picking up', object.payload.orderID);
+    let newOrder = JSON.stringify(orderInTransit(object.payload));
     client.write(newOrder);
-  } 
+  }, 1000);
+  
 }
 
-function orderInTransit() {
+function orderInTransit(object) {
   const orderInfo = {
     event: 'in-transit',
-    payload: storeInfo.payload,
+    payload: object,
   };
   return orderInfo;
 }
 
-
-function simulateDelivery(){
+function simulateDelivery(object){
   setTimeout(() => {
-    let newOrder = JSON.stringify(deliveryConfirmation());
+    let newOrder = JSON.stringify(deliveryConfirmation(object.payload));
     client.write(newOrder);
   }, 3000);
 }
 
-function deliveryConfirmation () {
+function deliveryConfirmation (object) {
   const orderInfo = {
     event: 'delivered',
-    payload: storeInfo.payload,
+    payload: object,
   };
   return orderInfo;
 }
