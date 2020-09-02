@@ -18,40 +18,46 @@ client.connect(port, host, () => {
  });
 
 
-// client.connect('data', buffer => {
-//   let raw = buffer.toString();
-//   let object = JSON.parse(raw);
-//   checkForDelivered(object);
-// });
+client.on('data', buffer => {
+  let raw = buffer.toString();
+  let object = JSON.parse(raw);
+  if(object.event === 'delivered'){
+    console.log('thank you for delivering', object.payload.orderID);
+  } else {
+    return;
+  }
+});
+
 // function checkForDelivered(object){
 //   if(object.event === 'delivered'){
 //     console.log('thank you for delivering', object.payload.orderID);
+//   } else {
+//     return;
 //   }
 // }
 
-// function mockDelivery() {
-//   const storeInfo = {
-//     event: 'pickup',
-//     time: new Date(),
-//     payload: {
-//       store: `${faker.phone.phoneNumber()}`,
-//       orderID: `${faker.random.number()}`,
-//       customer: `${faker.name.findName()}`,
-//       address: `${faker.address.streetAddress()}`,
-//     }
-//   }
-//   return storeInfo;
+function mockDelivery() {
+  const orderInfo = {
+    event: 'pickup',
+    payload: {
+      time: new Date(),
+      store: `${faker.phone.phoneNumber()}`,
+      orderID: `${faker.random.number()}`,
+      customer: `${faker.name.findName()}`,
+      address: `${faker.address.streetAddress()}`,
+    }
+  }
+  return orderInfo;
+}
 
-// }
+setInterval(() => {
+  sendNewOrder()
+}, 5000);
 
-// setInterval(() => {
-//   sendNewOrder()
-// }, 5000);
-
-// function sendNewOrder(){
-//   let newPackage = JSON.stringify(mockDelivery());
-//   socket.write(newPackage);
-// }
+function sendNewOrder(){
+  let newOrder = JSON.stringify(mockDelivery());
+  client.write(newOrder);
+}
 
 
 

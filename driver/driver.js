@@ -18,19 +18,51 @@ require('dotenv').config();
 // emitter.on('pickup', inTransitHandler);
 // emitter.on('in-transit', deliveredHandler);
 
-// client.on('', )
-// function inTransitHandler(order) {
-// // wait one second
-//   setTimeout( () => {
-//     console.log(`Driver picked up ${order.orderID}`);
-//     emitter.emit('in-transit', order);
-//   }, 1000);
-// }
+// client.on('data', inTransitHandler(order) {
+//     let event = JSON.parse(order);
 
-// function deliveredHandler(order) {
-//   setTimeout( () => {
-//     console.log(`DRIVER: delivered ${order.orderID}`);
-//     emitter.emit('delivered', order);
-//   }, 3000);
+//     if(event.event === '') {
 
-// }
+//     }
+// })
+
+client.on('data', buffer => {
+  let raw = buffer.toString();
+  let object = JSON.parse(raw);
+  checkForPickup(object);
+  simulateDelivery(object);
+});
+
+function checkForPickup(object){
+  if(object.event === 'pickup'){
+    setTimeout(() => {
+      console.log('picking up', object.payload.orderID);
+    }, 1000);
+    let newOrder = JSON.stringify(orderInTransit());
+    client.write(newOrder);
+  } 
+}
+
+function orderInTransit() {
+  const orderInfo = {
+    event: 'in-transit',
+    payload: storeInfo.payload,
+  };
+  return orderInfo;
+}
+
+
+function simulateDelivery(){
+  setTimeout(() => {
+    let newOrder = JSON.stringify(deliveryConfirmation());
+    client.write(newOrder);
+  }, 3000);
+}
+
+function deliveryConfirmation () {
+  const orderInfo = {
+    event: 'delivered',
+    payload: storeInfo.payload,
+  };
+  return orderInfo;
+}
