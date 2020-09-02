@@ -1,6 +1,6 @@
 'use strict';
 
-const driver = require('../apps/driver');
+const driver = require('../driver/driver');
 const emitter = require('../lib/events');
 
 jest.useFakeTimers();

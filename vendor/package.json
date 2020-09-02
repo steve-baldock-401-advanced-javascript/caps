@@ -1,8 +1,8 @@
 {
-  "name": "caps",
+  "name": "vendor",
   "version": "1.0.0",
   "description": "Caps - Event-Driven Application",
-  "main": "caps.js",
+  "main": "vendor.js",
   "scripts": {
     "test": "jest --verbose --coverage",
     "test-watch": "jest --watchAll --verbose --coverage"
@@ -21,10 +21,7 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "faker": "^5.1.0",
-    "inquire": "^0.4.8",
-    "inquirer": "^7.3.3",
     "jest": "^24.9.0",
-    "net": "^1.0.2",
     "node": "^14.8.0"
   }
 }
