@@ -1,8 +1,5 @@
 'use strict';
 
-// const events = require('./lib/events.js.js');
-// require('../vendor/vendor');
-// require('../driver/driver');
 
 // Networking library included with Node JS
 const net = require('net');
@@ -12,9 +9,9 @@ const port = process.env.PORT || 3000;
 const server = net.createServer();
 
 // this is old caps.js stuff
-server.on('pickup', payload => logEvent('pickup', payload));
-server.on('in-transit', payload => logEvent('in-transit', payload));
-server.on('delivered', payload => logEvent('delivered', payload));
+// server.on('pickup', payload => logEvent('pickup', payload));
+// server.on('in-transit', payload => logEvent('in-transit', payload));
+// server.on('delivered', payload => logEvent('delivered', payload));
 
 
 server.listen(port, () => console.log(`Server up on ${port}`));
@@ -38,7 +35,6 @@ server.on('connection', (socket) => {
 function dispatchEvent(message) {
   logEvent(message);
   broadcast(message);
-
 }
 
 function logEvent(message) {
@@ -51,8 +47,6 @@ function logEvent(message) {
 
 // Need to loop over every socket connection and manually send message to them
 function broadcast(message) {
-  // Message is an object with 2 props - event and payload
-  // We can use those to handle every event type and payload differently, if we choose
   let payload = JSON.stringify(message);
   for(let socket in socketPool) {
     socketPool[socket].write(payload);
