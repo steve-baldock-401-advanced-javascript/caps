@@ -1,58 +1,39 @@
 'use strict';
 
-
+// const net = require('net');
 // Networking library included with Node JS
-const net = require('net');
-
 require('dotenv').config();
-const port = process.env.PORT || 3000;
-const server = net.createServer();
+// const port = process.env.PORT || 3000;
+// const server = net.createServer();
+// server.listen(port, () => console.log(`Server up on ${port}`));
 
-// this is old caps.js stuff
-// server.on('pickup', payload => logEvent('pickup', payload));
-// server.on('in-transit', payload => logEvent('in-transit', payload));
-// server.on('delivered', payload => logEvent('delivered', payload));
+const io = require('socket.io')(process.env.PORT || 3000);
 
+const caps  = io.of('/caps');
 
-server.listen(port, () => console.log(`Server up on ${port}`));
+caps.on('connection', (socket) => {
+  console.log('CAPS ROOM', socket.id);
 
-// Create a list of clients that have connected to us
-let socketPool = {};
+  socket.on('join', room  => {
+    console.log('joined', process.env.STORE_NAME);
+    socket.join(room);
+  });
 
-server.on('connection', (socket) => {
-  //give each client a unique ID number
-  const id = `Socket-${Math.random()}`;
-  // Add them to the list (for later)
-  socketPool[id] = socket;
+  socket.on('pickup', (payload) => {
+    caps.emit('pickup', payload);
+    console.log('PICKUP ORDER', payload);
+  });
 
-  //Here's what we do when events come in
-  socket.on('data', buffer => dispatchEvent(buffer.toString()));
+  socket.on('in-transit', (payload) => {
+    caps.to(process.env.STORE_NAME).emit('in-transit', payload);
+    console.log('ORDER IN-TRANSIT', payload);
+  });
 
-  socket.on('error', (e) => { console.log('SOCKET ERROR', e); });
-  socket.on('end', () => deleteSocket(socket.id));
+  socket.on('delivered', (payload) => {
+    caps.to(process.env.STORE_NAME).emit('delivered', payload);
+    console.log('DELIVERED', payload);
+  });
 });
 
-function dispatchEvent(message) {
-  logEvent(message);
-  broadcast(message);
-}
 
-function logEvent(message) {
-  const time = new Date();
-  const messageObj = JSON.parse(message);
-  const eventName = messageObj.event;
-  const payload = messageObj.payload; 
-  console.log('EVENT', {event:eventName, time, payload });
-}
 
-// Need to loop over every socket connection and manually send message to them
-function broadcast(message) {
-  let payload = JSON.stringify(message);
-  for(let socket in socketPool) {
-    socketPool[socket].write(payload);
-  }
-}
-
-function deleteSocket(id) {
-  delete socketPool[id];
-}

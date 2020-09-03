@@ -3,46 +3,35 @@
 require('dotenv').config();
 
 // Helps get user input from command line
-const inquirer = require('inquirer');
+// const inquirer = require('inquirer');
 // TCP Library
-const net = require('net');
+// const net = require('net');
 var faker = require('faker');
 
-const client = new net.Socket();
+const io = require('socket.io-client');
+const vendorSocket = io.connect('http://localhost:3000/caps');
 
-// const emitter = require('../lib/events.js');
-const port = process.env.PORT || 3000;
-const host = process.env.LOCALHOST || 'localhost';
-client.connect(port, host, () => {
-  console.log('Vendor successfully connected to', host, ':', port);
-  setInterval(mockDelivery, 5000)
- });
+vendorSocket.emit('join', process.env.STORE_NAME);
 
-
-client.on('data', buffer => {
-  let raw = buffer.toString();
-  let object = JSON.parse(raw);
-  if(object.event === 'delivered'){
-    console.log('thank you for delivering', object.payload.orderID);
-  } else {
-    return;
-  }
-});
-
-function mockDelivery() {
-  const orderInfo = {
-    event: 'pickup',
-    payload: {
+  setInterval(() => {
+    const order = {
       time: new Date(),
-      store: `${faker.phone.phoneNumber()}`,
+      store: process.env.STORE_NAME || 'stevestore',
       orderID: `${faker.random.number()}`,
       customer: `${faker.name.findName()}`,
       address: `${faker.address.streetAddress()}`,
-    }
-  }
-  
-  client.write(JSON.stringify(orderInfo));
-}
+    };
+      vendorSocket.emit('pickup', order);
+    }, 5000);
+
+    vendorSocket.on('delivered', (payload) => {
+      console.log(`Thank you for delivering ${payload.orderID}`);
+    });
+
+
+
+
+
 
 
 
